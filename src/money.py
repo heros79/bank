@@ -1,3 +1,6 @@
+from functools import wraps
+
+@wraps
 def validate_money(func):
     def wrapp(*args):
         a = args[1]
@@ -11,6 +14,7 @@ def validate_money(func):
         return func(*args)
     return wrapp
 
+@wraps
 def validate_param(func):
     def wrapp(*args):
         a = args[1]
@@ -24,10 +28,20 @@ def validate_param(func):
         return func(*args)
     return wrapp
 
+@wraps
+def validate_currency(func):
+    def wrapp(*args):
+        current = args[0]
+        other = args[1]
+        if current.currency != other.currency:
+            raise ValueError('Currency must be same')
+        return func(*args)
+    return wrapp
+
 class Money:
 
     def __init__(self, amount: float, currency: str) -> None:
-        if amount <= 0:
+        if amount < 0:
             raise ValueError('Amount must be positive')
 
         self.__amount = amount
@@ -40,30 +54,41 @@ class Money:
         return hash((self.__amount, self.__currency))
 
     @validate_money
+    @validate_currency
     def __add__(self, other):
-
-        if self.__currency != other.__currency:
-            raise ValueError('Currencies must match')
-
-        return Money(self.__amount + other.__amount, self.__currency)
+        total = Money(self.__amount + other.__amount, self.__currency)
+        return total
 
     @validate_money
+    @validate_currency
     def __sub__(self, other):
-        if self.__currency != other.__currency:
-            raise ValueError('Currencies must match')
-
-        return Money(self.__amount - other.__amount, self.__currency)
+        total = Money(self.__amount - other.__amount, self.__currency)
+        return total
 
     @validate_param
     def __mul__(self, other):
-        return Money(self.__amount * other, self.__currency)
+        total = Money(self.__amount * other, self.__currency)
+        return total
 
     @validate_param
     def __truediv__(self, other):
-        return Money(self.__amount / other, self.__currency)
+        total = Money(self.__amount / other, self.__currency)
+        return total
+
+    @validate_param
+    def __rmul__(self, other):
+        total = Money(self.__amount * other, self.__currency)
+        return total
+
+    @validate_param
+    def __rtruediv__(self, other):
+        total = Money(self.__amount / other, self.__currency)
 
     def __str__(self):
-        return str(f'amount={self.__amount}, currency={self.__currency}')
+        return f'amount={self.__amount}, currency={self.__currency}'
+
+    def __repr__(self):
+        return f'Money(amount={self.__amount}, currency={self.__currency})'
 
     @property
     def amount(self):
@@ -76,6 +101,5 @@ class Money:
 
 
 if __name__ == '__main__':
-    m = Money(42, 'USD')
-    n = Money(42, 'USD')
-    print(m == n)
+    #Money(42, 'USD') + Money(42, 'USD')
+    print(10 * Money(42, 'USD'))
