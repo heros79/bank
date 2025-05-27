@@ -83,6 +83,7 @@ class Money:
     @validate_param
     def __rtruediv__(self, other):
         total = Money(self.__amount / other, self.__currency)
+        return total
 
     def __str__(self):
         return f'amount={self.__amount}, currency={self.__currency}'
@@ -97,9 +98,3 @@ class Money:
     @property
     def currency(self):
         return self.__currency
-
-
-
-if __name__ == '__main__':
-    #Money(42, 'USD') + Money(42, 'USD')
-    print(10 * Money(42, 'USD'))
